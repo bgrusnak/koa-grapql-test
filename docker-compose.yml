@@ -1,0 +1,49 @@
+version: '2'
+
+services:
+
+  postgres:
+    image: postgres
+    restart: always
+    ports:
+      - "5685:5432"
+    volumes_from:
+      - pgdata
+    environment:
+      POSTGRES_USER: example
+      POSTGRES_PASS: example
+      POSTGRES_DB: example
+
+  pgdata:
+    image: busybox
+    volumes:
+      - /data
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  api:
+    build: .
+    # Running tests                                   : mocha --reporter spec
+    # Auto restart server after change code           : nodemon
+    command:  bash -c "
+              npm run preload &
+              npm start"  
+    working_dir: /usr/app/
+    volumes:
+      - ./:/usr/app/
+    ports:
+      - "3000:3000"
+      #- "8701:8701"  
+    # environment:
+      # development or production
+      # NODE_ENV: development
+      # NODE_PORT: 3232
+      
+      # DB_HOST: host
+      # DB_PORT: 5432
+      # DB_NAME: dbname
+      # DB_USERNAME: username
+      # DB_PASSWORD: pass
+
+      # DB_MAX: 100
+      # DB_IDLE_TIMEOUT: 7000
+      # DB_CONNECTION_TIMEOUT: 7000
